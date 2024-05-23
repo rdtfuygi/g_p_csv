@@ -20,7 +20,7 @@ public:
 
 GPCSV_DLL void order_title();
 
-GPCSV_DLL void order_write(std::string name, float q, float q_var, float c, float h, float t, float t_var, float s = 0.95, int f = 0, bool utf8 = false);
+GPCSV_DLL void order_write(const char* name_ptr, float q, float q_var, float c, float h, float t, float t_var, float s = 0.95, int f = 0, bool utf8 = false);
 
 GPCSV_DLL void order_read(std::vector<std::string>& name, std::vector<float>& q, std::vector<float>& q_var, std::vector<float>& c, std::vector<float>& h, std::vector<float>& t, std::vector<float>& t_var, std::vector<float>& s, std::vector<int>& f, bool utf8 = false);
 

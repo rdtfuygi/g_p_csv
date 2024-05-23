@@ -108,19 +108,22 @@ void order_title()
 {
 	std::fstream a(order_filename, std::ios::out);
 	std::string n_= "货物名称,订单量,订单方差,采购成本,持有成本,提前期,提前期方差,服务水平,储存方式";
-
-	a << n_ << endl;
+	n_ = ansi_utf8(n_);
+	char bom[4] = { char(0xef),char(0xbb),char(0xbf),char(0) };
+	a << bom << n_ << endl;
 }
 
-void order_write(std::string name, float q, float q_var, float c, float h, float t, float t_var, float s, int f, bool utf8)
+void order_write(const char* name_ptr, float q, float q_var, float c, float h, float t, float t_var, float s, int f, bool utf8)
 {
+	std::string name = name_ptr;
+	std::string temp;
 	if (utf8)
 	{
-		name = utf8_ansi(name);
+		temp = utf8_ansi(name);
 	}
 	std::fstream a(order_filename, std::ios::app);
 	std::string name_;
-	for (auto word : name)
+	for (auto word : temp)
 	{
 		if (word == '"')
 		{
@@ -135,7 +138,10 @@ void order_write(std::string name, float q, float q_var, float c, float h, float
 	{
 		f = 0;
 	}
-	a << "\"" << name_ << "\"," << q << "," << q_var << "," << c << "," << h << "," << t << "," << t_var << "," << s << "," << f << std::endl;
+
+
+
+	a << "\"" << ansi_utf8(name_) << "\"," << q << "," << q_var << "," << c << "," << h << "," << t << "," << t_var << "," << s << "," << f << std::endl;
 }
 
 
@@ -148,15 +154,17 @@ void order_read(std::vector<order_data>& d)
 	int j = 0;
 	while (std::getline(a, s))
 	{
-		if (s.size() == 0)
+		std::string s_ = utf8_ansi(s);
+		if (s_.size() == 0)
 		{
 			continue;
 		}
 		d.push_back(order_data());
 		int n = 0;
 		std::string num;
+		std::string name;
 		double temp;
-		for (auto i : s)
+		for (auto i : s_)
 		{
 			if (n >= 0)
 			{
@@ -166,7 +174,7 @@ void order_read(std::vector<order_data>& d)
 					n++;
 					if (n != 1 && n % 2 == 1)
 					{
-						d[j].name.push_back('\"');
+						name.push_back('\"');
 					}
 					break;
 				case ',':
@@ -176,11 +184,11 @@ void order_read(std::vector<order_data>& d)
 					}
 					else
 					{
-						d[j].name.push_back(i);
+						name.push_back(i);
 					}
 					break;
 				default:
-					d[j].name.push_back(i);
+					name.push_back(i);
 					break;
 				}
 			}
@@ -227,12 +235,16 @@ void order_read(std::vector<order_data>& d)
 				}
 			}
 		}
-		if (d[j].name.size() == 0)
+
+		//std::cout << name.size() << std::endl;
+
+		if (name.size() == 0)
 		{
-			d[j].name.push_back(' ');
+			name.push_back(' ');
 		}
 		temp = std::stod(num);
 		d[j].f = temp;
+		d[j].name = ansi_utf8(name);
 		j++;
 	}
 
@@ -255,9 +267,9 @@ void order_read(std::vector<std::string>& name, std::vector<float>& q, std::vect
 	order_read(d);
 	for (order_data& i : d)
 	{
-		if (utf8)
+		if (!utf8)
 		{
-			name.push_back(ansi_utf8(i.name));
+			name.push_back(utf8_ansi(i.name));
 		}
 		else
 		{
@@ -280,7 +292,17 @@ bool order_right()
 	std::fstream a(order_filename, std::ios::in);
 	std::string s;
 	std::string t = "货物名称,订单量,订单方差,采购成本,持有成本,提前期,提前期方差,服务水平,储存方式";
+
+	char bom[3] = { 0 };
+	a.read(bom, 3);
+	if (bom[0] == '\xEF' && bom[1] == '\xBB' && bom[2] == '\xBF') {
+	}
+	else {
+		a.seekg(0);
+	}
+
 	std::getline(a, s);
+	s = utf8_ansi(s);
 	if (s.size() != t.size())
 	{
 		return false;
@@ -300,9 +322,11 @@ void building_write(std::vector<float>& d)
 {
 	std::string name[8] = { "货车停车场","分拣区","常温仓储区","冷藏仓储区","冷冻储存区","办公管理区","生活服务区","员工停车场" };
 	std::fstream a(building_filename, std::ios::out);
+	char bom[4] = { char(0xef),char(0xbb),char(0xbf),char(0) };
+	a << bom << endl;
 	for (int i = 0; i < 8; i++)
 	{
-		a << name[i] << ",x,y" << std::endl;
+		a << ansi_utf8(name[i]) << ",x,y" << std::endl;
 		int k = 0;
 		for (int j = 0; j < 16; j++)
 		{
@@ -323,7 +347,7 @@ void building_write(std::vector<float>& d)
 				a << k << ',' << d[x_i] << ',' << d[y_i] << std::endl;
 			}
 		}
-		a << "门," << int(round(d[i * 34 + 32])) << ',' << int(round(d[i * 34 + 33])) << std::endl;
+		a << ansi_utf8("门,") << int(round(d[i * 34 + 32])) << ',' << int(round(d[i * 34 + 33])) << std::endl;
 	}
 }
 
