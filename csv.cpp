@@ -111,6 +111,7 @@ void order_title()
 	n_ = ansi_utf8(n_);
 	char bom[4] = { char(0xef),char(0xbb),char(0xbf),char(0) };
 	a << bom << n_ << endl;
+	a.close();
 }
 
 void order_write(const char* name_ptr, float q, float q_var, float c, float h, float t, float t_var, float s, int f, bool utf8)
@@ -139,9 +140,9 @@ void order_write(const char* name_ptr, float q, float q_var, float c, float h, f
 		f = 0;
 	}
 
-
-
 	a << "\"" << ansi_utf8(name_) << "\"," << q << "," << q_var << "," << c << "," << h << "," << t << "," << t_var << "," << s << "," << f << std::endl;
+
+	a.close();
 }
 
 
@@ -263,7 +264,7 @@ void order_read(std::vector<order_data>& d)
 		d[j].name = ansi_utf8(name);
 		j++;
 	}
-
+	a.close();
 }
 
 void order_read(std::vector<std::string>& name, std::vector<float>& q, std::vector<float>& q_var, std::vector<float>& c, std::vector<float>& h, std::vector<float>& t, std::vector<float>& t_var, std::vector<float>& s, std::vector<int>& f, bool utf8)
@@ -303,6 +304,55 @@ void order_read(std::vector<std::string>& name, std::vector<float>& q, std::vect
 	}
 }
 
+
+
+std::vector<order_data> order_date_v;
+GPCSV_DLL int order_read()
+{
+	order_date_v = std::vector<order_data>();
+	order_read(order_date_v);
+	return order_date_v.size();
+}
+
+GPCSV_DLL bool order_read(char** name_ptr, float& q, float& q_var, float& c, float& h, float& t, float& t_var, float& s, int& f, int i, bool utf8)
+{
+	if ((*name_ptr) != nullptr)
+	{
+		delete[](*name_ptr);
+	}
+	if (i > order_date_v.size() || i < 0)
+	{
+		return false;
+	}
+	order_data order = order_date_v[i];
+
+	std::string name;
+	if (utf8)
+	{
+		name = order.name;
+	}
+	else
+	{
+		name = utf8_ansi(order.name);
+	}
+
+	*name_ptr = new char[name.size() + 1];
+	for (int j = 0; j < name.size(); j++)
+	{
+		(*name_ptr)[j] = name[j];
+	}
+	(*name_ptr)[name.size()] = char(0);
+	q = order.q;
+	q_var = order.q_var;
+	c = order.c;
+	h = order.h;
+	t = order.t;
+	t_var = order.t_var;
+	s = order.s;
+	f = order.f;
+	return true;
+}
+
 bool order_right()
 {
 	std::fstream a(order_filename, std::ios::in);
@@ -331,6 +381,7 @@ bool order_right()
 		}
 	}
 	return true;
+	a.close();
 }
 
 
@@ -365,6 +416,7 @@ void building_write(std::vector<float>& d)
 		}
 		a << ansi_utf8("це,") << int(round(d[i * 34 + 32])) << ',' << int(round(d[i * 34 + 33])) << std::endl;
 	}
+	a.close();
 }
 
 

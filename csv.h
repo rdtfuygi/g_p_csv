@@ -24,6 +24,9 @@ GPCSV_DLL void order_write(const char* name_ptr, float q, float q_var, float c, 
 
 GPCSV_DLL void order_read(std::vector<std::string>& name, std::vector<float>& q, std::vector<float>& q_var, std::vector<float>& c, std::vector<float>& h, std::vector<float>& t, std::vector<float>& t_var, std::vector<float>& s, std::vector<int>& f, bool utf8 = false);
 
+GPCSV_DLL int order_read();
+
+GPCSV_DLL bool order_read(char** name_ptr, float& q, float& q_var, float& c, float& h, float& t, float& t_var, float& s, int& f, int i, bool utf8 = false);
 
 GPCSV_DLL bool order_right();
 
