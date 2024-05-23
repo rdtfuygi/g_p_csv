@@ -200,7 +200,14 @@ void order_read(std::vector<order_data>& d)
 				}
 				else
 				{
-					temp = std::stod(num);
+					if(num.size()!=0)
+					{
+						temp = std::stod(num);
+					}
+					else
+					{
+						temp = 0;
+					}
 					switch (n)
 					{
 					case -1:
@@ -242,7 +249,16 @@ void order_read(std::vector<order_data>& d)
 		{
 			name.push_back(' ');
 		}
-		temp = std::stod(num);
+
+		if (num.size() != 0)
+		{
+			temp = std::stod(num);
+		}
+		else
+		{
+			temp = 0;
+		}
+
 		d[j].f = temp;
 		d[j].name = ansi_utf8(name);
 		j++;
